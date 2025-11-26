@@ -222,12 +222,16 @@
       console.log("Page Loaded:", ms(nav.loadEventEnd));
     }
 
-    // LCP resource details
-    const lcpEntry = performance.getEntriesByType("largest-contentful-paint").at(-1);
-    if (lcpEntry) {
-      console.log("LCP element:", lcpEntry.element);
-      console.log("LCP load time:", ms(lcpEntry.startTime));
-      console.log("LCP resource URL:", lcpEntry.url || "(inline / background)");
+    // Use the buffered LCP entry captured earlier
+    let lastLCP = null;
+    new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      if (entries.length) lastLCP = entries.at(-1);
+    }).observe({ type: "largest-contentful-paint", buffered: true });
+    if (lastLCP) {
+      console.log("LCP element:", lastLCP.element);
+      console.log("LCP load time:", ms(lastLCP.startTime));
+      console.log("LCP resource URL:", lastLCP.url || "(inline / background)");
     }
 
     // Resource timing breakdown
