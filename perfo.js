@@ -14,6 +14,9 @@
   if (window.__perfOverlayLoaded) return;
   window.__perfOverlayLoaded = true;
 
+  // Keep reference to last LCP entry for console breakdown
+  let lastLCPEntry = null;
+
   // ---------- UI HELPERS ----------
   function el(tag, styles = {}, text = "") {
     const e = document.createElement(tag);
@@ -176,6 +179,10 @@
   new PerformanceObserver(list => {
     const last = list.getEntries().at(-1);
     if (!last) return;
+
+    // Store the last LCP entry so we can reuse it in the console breakdown
+    lastLCPEntry = last;
+
     const v = last.startTime;
     ui.lcp.textContent = "LCP: " + ms(v);
     ui.lcp.style.color = colorMetric(v, 2500, 4000);
@@ -222,16 +229,13 @@
       console.log("Page Loaded:", ms(nav.loadEventEnd));
     }
 
-    // Use the buffered LCP entry captured earlier
-    let lastLCP = null;
-    new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      if (entries.length) lastLCP = entries.at(-1);
-    }).observe({ type: "largest-contentful-paint", buffered: true });
-    if (lastLCP) {
-      console.log("LCP element:", lastLCP.element);
-      console.log("LCP load time:", ms(lastLCP.startTime));
-      console.log("LCP resource URL:", lastLCP.url || "(inline / background)");
+    // Use the buffered LCP entry captured earlier by the main observer
+    if (lastLCPEntry) {
+      console.log("LCP element:", lastLCPEntry.element);
+      console.log("LCP load time:", ms(lastLCPEntry.startTime));
+      console.log("LCP resource URL:", lastLCPEntry.url || "(inline / background)");
+    } else {
+      console.log("LCP details:", "not available yet (no LCP entry observed)");
     }
 
     // Resource timing breakdown
