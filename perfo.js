@@ -164,7 +164,7 @@
   function resourceStats() {
     const r = performance.getEntriesByType("resource");
     const count = r.length;
-    const weight = r.reduce((a, x) => a + (x.transferSize || 0), 0);
+    const weight = r.reduce((a, x) => a + (x.transferSize || x.encodedBodySize || 0), 0);
 
     ui.req.textContent = "Requests: " + count;
     ui.size.textContent = "Weight: " + kb(weight);
@@ -210,5 +210,44 @@
     ui.inp.textContent = "INP: " + ms(v);
     ui.inp.style.color = colorMetric(v, 200, 500);
   }).observe({ type: "event", durationThreshold: 40, buffered: true });
+
+  // ---------- DETAILED CONSOLE BREAKDOWN ----------
+  function logBreakdown() {
+    console.group("%cPerformance Breakdown", "color:#6EFF6E;font-weight:600;");
+
+    // Navigation timing (TTFB + main milestones)
+    if (nav) {
+      console.log("TTFB:", ms(nav.responseStart));
+      console.log("DOM Loaded:", ms(nav.domContentLoadedEventEnd));
+      console.log("Page Loaded:", ms(nav.loadEventEnd));
+    }
+
+    // LCP resource details
+    const lcpEntry = performance.getEntriesByType("largest-contentful-paint").at(-1);
+    if (lcpEntry) {
+      console.log("LCP element:", lcpEntry.element);
+      console.log("LCP load time:", ms(lcpEntry.startTime));
+      console.log("LCP resource URL:", lcpEntry.url || "(inline / background)");
+    }
+
+    // Resource timing breakdown
+    const res = performance.getEntriesByType("resource");
+    let totalEncoded = 0;
+    let totalTransfer = 0;
+
+    res.forEach(r => {
+      totalEncoded += r.encodedBodySize || 0;
+      totalTransfer += r.transferSize || r.encodedBodySize || 0;
+    });
+
+    console.log("Resource count:", res.length);
+    console.log("Total encoded weight:", kb(totalEncoded));
+    console.log("Total transfer weight:", kb(totalTransfer));
+
+    console.groupEnd();
+  }
+
+  // Execute after load
+  window.addEventListener("load", () => setTimeout(logBreakdown, 1200));
 
 })();
