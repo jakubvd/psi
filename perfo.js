@@ -31,39 +31,54 @@
   // ---------- PANEL UI ----------
   const panel = el("div", {
     position: "fixed",
-    bottom: "20px",
-    right: "20px",
-    width: "260px",
-    background: "rgba(0,0,0,0.85)",
-    color: "#fff",
-    padding: "14px",
-    borderRadius: "10px",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 0 30px rgba(0,0,0,0.45)",
-    fontFamily: "monospace",
+    bottom: "24px",
+    right: "24px",
+    minWidth: "260px",
+    maxWidth: "300px",
+    background: "rgba(20, 20, 24, 0.92)",
+    color: "#f5f5f7",
+    padding: "12px 14px 12px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.08)",
+    backdropFilter: "blur(18px)",
+    boxShadow: "0 18px 40px rgba(0,0,0,0.45)",
+    fontFamily: "-apple-system, BlinkMacSystemFont, system-ui, sans-serif",
     fontSize: "12px",
+    lineHeight: "1.4",
     zIndex: 999999999,
-    userSelect: "none"
+    userSelect: "none",
+    WebkitFontSmoothing: "antialiased",
   });
 
   const header = el("div", {
-    fontWeight: "bold",
-    marginBottom: "8px",
+    fontWeight: 500,
+    marginBottom: "6px",
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
     cursor: "grab",
+    fontSize: "12px",
+    letterSpacing: "0.01em",
   }, "Performance Monitor");
 
   const toggleBtn = el("div", {
-    fontWeight: "bold",
+    fontWeight: 500,
     cursor: "pointer",
-    padding: "0 6px"
+    padding: "0 8px",
+    borderRadius: "999px",
+    color: "rgba(245,245,247,0.9)",
   }, "–");
+
+  toggleBtn.onmouseenter = () => (toggleBtn.style.background = "rgba(255,255,255,0.12)");
+  toggleBtn.onmouseleave = () => (toggleBtn.style.background = "transparent");
 
   header.appendChild(toggleBtn);
   panel.appendChild(header);
 
   const body = el("div");
+
+  body.style.display = "grid";
+  body.style.rowGap = "2px";
 
   body.innerHTML = `
     <div id="lcp">LCP: …</div>
